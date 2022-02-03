@@ -9,5 +9,5 @@ add_executable(
     ${PROJECT_NAME}
     main.cpp
     checked.cpp
-    normal_calc_test.cpp
+    test.cpp
 )

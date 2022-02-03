@@ -9,7 +9,6 @@ using namespace checked;
 using i64 = std::int64_t;
 using i32 = std::int32_t;
 using u32 = std::uint32_t;
-constexpr u32 cases = 10;
 constexpr std::streamsize m = 20;
 std::random_device rd;
 std::mt19937 eng32(rd());
@@ -48,8 +47,10 @@ void output_testcase(Checked& lhs, Checked& rhs, Checked& res, const Op& op) {
         return;
 }
 namespace normal_calc_test {
+    constexpr u32 cases = 10;
     std::string flag = "Yes";
     void test() {
+        std::cout << "Normal Calculation Test" << std::endl;
         for(u32 i = 0; i < cases; ++i) {
             i64 unchecked_l(get_random_32()), unchecked_r(get_random_32());
             Checked checked_l(unchecked_l), checked_r(unchecked_r);
@@ -64,6 +65,51 @@ namespace normal_calc_test {
             }
         }
         std::cout << "All results are correct: " << flag << std::endl;
+        std::cout << std::endl;
+        return;
+    }
+}
+namespace assignment_calc_test {
+    constexpr u32 cases = 10;
+    std::string flag = "Yes";
+    template <typename T> void calc_result(T& assigned, const T& rhs, const Op& op) {
+        switch(op) {
+            case Op::add: assigned += rhs; break;
+            case Op::sub: assigned -= rhs; break;
+            case Op::mul: assigned *= rhs; break;
+            case Op::div: assigned /= rhs; break;
+            case Op::mod: assigned %= rhs; break;
+            case Op::equ: break;
+        }
+        return;
+    }
+    void test() {
+        std::cout << "Assignment Calculation Test" << std::endl;
+        i64 unchecked_assigned(get_random_32());
+        Checked checked_assigned(unchecked_assigned);
+        for(u32 i = 0; i < cases; ++i) {
+            i64 unchecked_rhs(get_random_32());
+            Checked checked_rhs(unchecked_rhs);
+            Op op = get_random_op();
+
+            std::cout << "Assign " << op << std::setw(m) << checked_rhs.get_value() << " to " << std::setw(m) << checked_assigned.get_value();
+
+            calc_result(checked_assigned, checked_rhs, op);
+            calc_result(unchecked_assigned, unchecked_rhs, op);
+
+            std::cout << " Assigned = " << std::setw(m) << checked_assigned.get_value();
+
+            if(checked_assigned.get_value() == unchecked_assigned) std::cout << " : o" << std::endl;
+            else {
+                std::cout << " : x" << std::endl;
+                flag = "No";
+            }
+
+            while(checked_assigned.get_value() > INT32_MAX || INT32_MIN > checked_assigned.get_value()) checked_assigned /= 10;
+            while(unchecked_assigned > INT32_MAX || INT32_MIN > unchecked_assigned) unchecked_assigned /= 10;
+        }
+        std::cout << "All results are correct: " << flag << std::endl;
+        std::cout << std::endl;
         return;
     }
 }
