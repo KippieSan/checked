@@ -47,7 +47,7 @@ void output_testcase(Checked& lhs, Checked& rhs, Checked& res, const Op& op) {
         return;
 }
 namespace normal_calc_test {
-    constexpr u32 cases = 10;
+    constexpr u32 cases = 100;
     std::string flag = "Yes";
     void test() {
         std::cout << "Normal Calculation Test" << std::endl;
@@ -70,7 +70,7 @@ namespace normal_calc_test {
     }
 }
 namespace assignment_calc_test {
-    constexpr u32 cases = 10;
+    constexpr u32 cases = 100;
     std::string flag = "Yes";
     template <typename T> void calc_result(T& assigned, const T& rhs, const Op& op) {
         switch(op) {
@@ -107,6 +107,36 @@ namespace assignment_calc_test {
 
             while(checked_assigned.get_value() > INT32_MAX || INT32_MIN > checked_assigned.get_value()) checked_assigned /= 10;
             while(unchecked_assigned > INT32_MAX || INT32_MIN > unchecked_assigned) unchecked_assigned /= 10;
+        }
+        std::cout << "All results are correct: " << flag << std::endl;
+        std::cout << std::endl;
+        return;
+    }
+}
+namespace logical_calc_test {
+    constexpr u32 cases = 100;
+    constexpr u32 p = 10, hit = 4;
+    std::string flag = "Yes";
+    void test() {
+        std::cout << "Logical Operation Test" << std::endl;
+        for(u32 i = 0; i < cases; ++i) {
+            i64 unchecked_l(get_random_32()), unchecked_r(get_random_32());
+            unchecked_r = unchecked_l % p == hit ? unchecked_l : unchecked_r;
+            Checked checked_l(unchecked_l), checked_r(unchecked_r);
+
+            std::cout << "l: " << std::setw(m) << checked_l.get_value() << " r: " << std::setw(m) << checked_r.get_value() << " result: ";
+
+            const bool result = ((checked_l <=> checked_r) == (unchecked_l <=> unchecked_r));
+            const auto equal = (checked_l <=> checked_r);
+            
+            std::cout << std::boolalpha << result;
+            if((checked_l <=> checked_r) == (unchecked_l <=> unchecked_r)) std::cout << " : o";
+            else {
+                std::cout << " : x";
+                flag = "No";
+            }
+            if(equal == std::strong_ordering::equal) std::cout << " equivalent";
+            std::cout << std::endl;
         }
         std::cout << "All results are correct: " << flag << std::endl;
         std::cout << std::endl;
