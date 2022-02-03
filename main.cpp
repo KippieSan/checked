@@ -1,7 +1,7 @@
 #include <iostream>
 #include "checked.hpp"
+#include "test.hpp"
 int main() {
-    checked::Checked a(100), b(200);
-    std::cout << a * b << std::endl;
+    normal_calc_test::test();
     return 0;
 }
