@@ -2,9 +2,9 @@
 #include "checked.hpp"
 #include "test.hpp"
 int main() {
-    normal_calc_test::test();
-    assignment_calc_test::test();
-    logical_calc_test::test();
-    overflow_test::test();
+    normal_calc::test();
+    assignment_calc::test();
+    logical_calc::test();
+    overflow::test();
     return 0;
 }

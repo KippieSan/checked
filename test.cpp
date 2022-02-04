@@ -11,6 +11,7 @@ using i64 = std::int64_t;
 using i32 = std::int32_t;
 using u32 = std::uint32_t;
 constexpr std::streamsize m = 20;
+constexpr bool large_test = true;
 std::random_device rd;
 std::mt19937 eng32(rd());
 std::mt19937_64 eng64(rd());
@@ -46,14 +47,29 @@ template <typename T> T calc_result(const T& lhs, const T& rhs, const Op& op) {
     return op_divided(op, std::vector{ lhs + rhs, lhs - rhs, lhs * rhs, lhs / rhs, lhs % rhs });
 }
 void output_testcase(Checked& lhs, Checked& rhs, Checked& res, const Op& op) {
-        std::cout << std::setw(m) << lhs << op << std::setw(m) << rhs << Op::equ << std::setw(m) << res;
+        if(!large_test) std::cout << std::setw(m) << lhs << op << std::setw(m) << rhs << Op::equ << std::setw(m) << res;
         return;
 }
-namespace normal_calc_test {
-    constexpr u32 cases = 100;
+bool is_correct(const bool condition, std::string& flag) {
+    if(condition) {
+        if(!large_test) std::cout << " : o";
+        return true;
+    }
+    else {
+        if(!large_test) std::cout << " : x";
+        flag = "No";
+        return false;
+    }
+}
+void testcases(const u32 cases) {
+    std::cout << " ( Cases: " << cases << " ) => ";
+}
+namespace normal_calc {
+    constexpr u32 cases = 1000000;
     std::string flag = "Yes";
     void test() {
         std::cout << "Normal Calculation Test" << std::endl;
+        if(large_test) testcases(cases);
         for(u32 i = 0; i < cases; ++i) {
             i64 unchecked_l(get_random_32()), unchecked_r(get_random_32());
             Checked checked_l(unchecked_l), checked_r(unchecked_r);
@@ -61,19 +77,16 @@ namespace normal_calc_test {
 
             Checked checked_res = calc_result(checked_l, checked_r, op);
             output_testcase(checked_l, checked_r, checked_res, op);
-            if(checked_res.get_value() == calc_result(unchecked_l, unchecked_r, op)) std::cout << " : o" << std::endl;
-            else {
-                std::cout << " : x" << std::endl;
-                flag = "No";
-            }
+            if(!is_correct(checked_res.get_value() == calc_result(unchecked_l, unchecked_r, op), flag)) std::cout << checked_l << op << checked_r << Op::equ << checked_res << std::endl;
+            if(!large_test) std::cout << std::endl;
         }
         std::cout << "All results are correct: " << flag << std::endl;
         std::cout << std::endl;
         return;
     }
 }
-namespace assignment_calc_test {
-    constexpr u32 cases = 100;
+namespace assignment_calc {
+    constexpr u32 cases = 1000;
     std::string flag = "Yes";
     template <typename T> void calc_result(T& assigned, const T& rhs, const Op& op) {
         switch(op) {
@@ -88,6 +101,7 @@ namespace assignment_calc_test {
     }
     void test() {
         std::cout << "Assignment Calculation Test" << std::endl;
+        if(large_test) testcases(cases);
         i64 unchecked_assigned(get_random_32());
         Checked checked_assigned(unchecked_assigned);
         for(u32 i = 0; i < cases; ++i) {
@@ -95,18 +109,16 @@ namespace assignment_calc_test {
             Checked checked_rhs(unchecked_rhs);
             Op op = get_random_op();
 
-            std::cout << "Assign " << op << std::setw(m) << checked_rhs.get_value() << " to " << std::setw(m) << checked_assigned.get_value();
+            if(!large_test) std::cout << "Assign " << op << std::setw(m) << checked_rhs.get_value() << " to " << std::setw(m) << checked_assigned.get_value();
 
             calc_result(checked_assigned, checked_rhs, op);
             calc_result(unchecked_assigned, unchecked_rhs, op);
 
-            std::cout << " Assigned = " << std::setw(m) << checked_assigned.get_value();
+            if(!large_test) std::cout << " Assigned = " << std::setw(m) << checked_assigned.get_value();
 
-            if(checked_assigned.get_value() == unchecked_assigned) std::cout << " : o" << std::endl;
-            else {
-                std::cout << " : x" << std::endl;
-                flag = "No";
-            }
+            if(!is_correct(checked_assigned.get_value() == unchecked_assigned, flag)) std::cout << "Assigned: " << checked_assigned << " Op: " << op << " Rhs: " << checked_rhs << std::endl;
+
+            if(!large_test) std::cout << std::endl;
 
             while(checked_assigned.get_value() > INT32_MAX || INT32_MIN > checked_assigned.get_value()) checked_assigned /= 10;
             while(unchecked_assigned > INT32_MAX || INT32_MIN > unchecked_assigned) unchecked_assigned /= 10;
@@ -116,39 +128,36 @@ namespace assignment_calc_test {
         return;
     }
 }
-namespace logical_calc_test {
-    constexpr u32 cases = 100;
+namespace logical_calc {
+    constexpr u32 cases = 1000;
     constexpr u32 p = 10, hit = 4;
     std::string flag = "Yes";
     void test() {
         std::cout << "Logical Operation Test" << std::endl;
+        if(large_test) testcases(cases);
         for(u32 i = 0; i < cases; ++i) {
             i64 unchecked_l(get_random_32()), unchecked_r(get_random_32());
             unchecked_r = unchecked_l % p == hit ? unchecked_l : unchecked_r;
             Checked checked_l(unchecked_l), checked_r(unchecked_r);
 
-            std::cout << "l: " << std::setw(m) << checked_l.get_value() << " r: " << std::setw(m) << checked_r.get_value() << " result: ";
+            if(!large_test) std::cout << "l: " << std::setw(m) << checked_l.get_value() << " r: " << std::setw(m) << checked_r.get_value() << " result: ";
 
             const bool result = ((checked_l <=> checked_r) == (unchecked_l <=> unchecked_r));
             const auto equal = (checked_l <=> checked_r);
             
-            std::cout << std::boolalpha << result;
-            if((checked_l <=> checked_r) == (unchecked_l <=> unchecked_r)) std::cout << " : o";
-            else {
-                std::cout << " : x";
-                flag = "No";
-            }
-            if(equal == std::strong_ordering::equal) std::cout << " equivalent";
-            std::cout << std::endl;
+            if(!large_test) std::cout << std::boolalpha << result;
+            if(!is_correct((checked_l <=> checked_r) == (unchecked_l <=> unchecked_r), flag)) std::cout << checked_l << " <=> " << checked_r << std::endl;
+            if(!large_test && equal == std::strong_ordering::equal) std::cout << " equivalent";
+            if(!large_test) std::cout << std::endl;
         }
         std::cout << "All results are correct: " << flag << std::endl;
         std::cout << std::endl;
         return;
     }
 }
-namespace overflow_test {
-    constexpr u32 cases = 10;
-    constexpr u32 continuance = 10;
+namespace overflow {
+    constexpr u32 cases = 100;
+    constexpr u32 continuance = 100;
     std::string flag = "Yes";
     i64 random_modulo() {
         return std::pow(10, eng32() % 10);
@@ -158,13 +167,14 @@ namespace overflow_test {
         bool greater_than_max = unchecked_result > std::max(unchecked_l, unchecked_r);
         bool divide_by_zero = unchecked_r == 0;
         if(unchecked_l >= 0 && unchecked_r >= 0) return op_divided(op, std::vector<bool>{ less_than_min, false, less_than_min, divide_by_zero, divide_by_zero });
-        else if(unchecked_l < 0 && unchecked_r < 0) return op_divided(op, std::vector<bool>{ greater_than_max, false, greater_than_max, divide_by_zero, divide_by_zero });
+        else if(unchecked_l < 0 && unchecked_r < 0) return op_divided(op, std::vector<bool>{ greater_than_max, false, less_than_min, divide_by_zero, divide_by_zero });
         else return op_divided(op, std::vector<bool>{ false, is_overflowing(unchecked_l, -unchecked_r, unchecked_l + (-unchecked_r), Op::add), greater_than_max, divide_by_zero, divide_by_zero });
     }
     void test() {
         std::cout << "Overflow Test" << std::endl;
+        if(large_test) testcases(cases * continuance);
         for(u32 i = 0; i < cases; ++i) {
-            std::cout << "test #" << i << std::endl;
+            if(!large_test) std::cout << "test #" << i << std::endl;
             i64 unchecked_result(0);
             Checked checked_result(0);
             HadOverflowed hof = HadOverflowed::No;
@@ -175,23 +185,22 @@ namespace overflow_test {
                 checked_result += calc_result(checked_l, checked_r, op);
                 unchecked_result += calc_result(unchecked_l, unchecked_r, op);
                 output_testcase(checked_l, checked_r, checked_result, op);
-                std::cout << " status: " << checked_result.get_status();
+                if(!large_test) std::cout << " status: " << checked_result.get_status();
+
+                const auto error = [&](const bool is_correct) {
+                    if(!is_correct) std::cout << std::setw(m) << checked_l << op << std::setw(m) << checked_r << Op::equ << checked_result << " stat: " << checked_result.get_status() << std::endl;
+                    return;
+                };
 
                 if(is_overflowing(unchecked_l, unchecked_r, unchecked_result, op)) {
-                    if(checked_result.get_status() == HadOverflowed::Yes) {
-                        std::cout << " : o";
-                        hof = HadOverflowed::Yes;
-                    }
-                    else {
-                        std::cout << " : x";
-                        flag = "No";
-                    }
+                    error(is_correct(checked_result.get_status() == HadOverflowed::Yes, flag));
+                    hof = HadOverflowed::Yes;
                 }
                 else {
-                    if(hof == HadOverflowed::Yes && checked_result.get_status() == HadOverflowed::Yes) std::cout << " : o";
-                    else std::cout << " : probably o";
+                    if(hof == HadOverflowed::Yes) error(is_correct(checked_result.get_status() == HadOverflowed::Yes, flag));
+                    else error(is_correct(checked_result.get_value() == unchecked_result, flag));
                 }
-                std::cout << std::endl;
+                if(!large_test) std::cout << std::endl;
                 checked_result *= 0;
                 unchecked_result *= 0;
             }
