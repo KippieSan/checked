@@ -3,6 +3,7 @@
 #include <vector>
 #include <random>
 #include <iomanip>
+#include <math.h>
 #include "checked.hpp"
 #include "test.hpp"
 using namespace checked;
@@ -12,7 +13,9 @@ using u32 = std::uint32_t;
 constexpr std::streamsize m = 20;
 std::random_device rd;
 std::mt19937 eng32(rd());
+std::mt19937_64 eng64(rd());
 i32 get_random_32() { return static_cast<i32>(eng32()); }
+i64 get_random_64() { return static_cast<i64>(eng64()); }
 
 std::ostream& operator<<(std::ostream& out, const HadOverflowed& hof) {
     if(static_cast<bool>(hof)) out << "HadOverflowed::Yes";
@@ -137,6 +140,61 @@ namespace logical_calc_test {
             }
             if(equal == std::strong_ordering::equal) std::cout << " equivalent";
             std::cout << std::endl;
+        }
+        std::cout << "All results are correct: " << flag << std::endl;
+        std::cout << std::endl;
+        return;
+    }
+}
+namespace overflow_test {
+    constexpr u32 cases = 10;
+    constexpr u32 continuance = 10;
+    std::string flag = "Yes";
+    i64 random_modulo() {
+        return std::pow(10, eng32() % 10);
+    }
+    bool is_overflowing(const i64& unchecked_l, const i64& unchecked_r, const i64& unchecked_result, const Op& op) {
+        bool less_than_min = unchecked_result < std::min(unchecked_l, unchecked_r);
+        bool greater_than_max = unchecked_result > std::max(unchecked_l, unchecked_r);
+        bool divide_by_zero = unchecked_r == 0;
+        if(unchecked_l >= 0 && unchecked_r >= 0) return op_divided(op, std::vector<bool>{ less_than_min, false, less_than_min, divide_by_zero, divide_by_zero });
+        else if(unchecked_l < 0 && unchecked_r < 0) return op_divided(op, std::vector<bool>{ greater_than_max, false, greater_than_max, divide_by_zero, divide_by_zero });
+        else return op_divided(op, std::vector<bool>{ false, is_overflowing(unchecked_l, -unchecked_r, unchecked_l + (-unchecked_r), Op::add), greater_than_max, divide_by_zero, divide_by_zero });
+    }
+    void test() {
+        std::cout << "Overflow Test" << std::endl;
+        for(u32 i = 0; i < cases; ++i) {
+            std::cout << "test #" << i << std::endl;
+            i64 unchecked_result(0);
+            Checked checked_result(0);
+            HadOverflowed hof = HadOverflowed::No;
+            for(u32 j = 0; j < continuance; ++j) {
+                i64 unchecked_l(get_random_64() / random_modulo()), unchecked_r(get_random_64() / random_modulo());
+                Checked checked_l(unchecked_l), checked_r(unchecked_r);
+                Op op = get_random_op();
+                checked_result += calc_result(checked_l, checked_r, op);
+                unchecked_result += calc_result(unchecked_l, unchecked_r, op);
+                output_testcase(checked_l, checked_r, checked_result, op);
+                std::cout << " status: " << checked_result.get_status();
+
+                if(is_overflowing(unchecked_l, unchecked_r, unchecked_result, op)) {
+                    if(checked_result.get_status() == HadOverflowed::Yes) {
+                        std::cout << " : o";
+                        hof = HadOverflowed::Yes;
+                    }
+                    else {
+                        std::cout << " : x";
+                        flag = "No";
+                    }
+                }
+                else {
+                    if(hof == HadOverflowed::Yes && checked_result.get_status() == HadOverflowed::Yes) std::cout << " : o";
+                    else std::cout << " : probably o";
+                }
+                std::cout << std::endl;
+                checked_result *= 0;
+                unchecked_result *= 0;
+            }
         }
         std::cout << "All results are correct: " << flag << std::endl;
         std::cout << std::endl;
