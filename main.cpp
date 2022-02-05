@@ -6,5 +6,6 @@ int main() {
     assignment_calc::test();
     logical_calc::test();
     overflow::test();
+    speed::test();
     return 0;
 }

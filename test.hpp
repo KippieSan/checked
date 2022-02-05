@@ -4,4 +4,5 @@ namespace normal_calc { void test(); }
 namespace assignment_calc { void test(); }
 namespace logical_calc { void test(); }
 namespace overflow { void test(); }
+namespace speed { void test(); }
 #endif // test_hpp
