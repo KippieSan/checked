@@ -4,6 +4,7 @@
 #include <random>
 #include <iomanip>
 #include <math.h>
+#include <chrono>
 #include "checked.hpp"
 #include "test.hpp"
 using namespace checked;
@@ -65,7 +66,7 @@ void testcases(const u32 cases) {
     std::cout << " ( Cases: " << cases << " ) => ";
 }
 namespace normal_calc {
-    constexpr u32 cases = 1000000;
+    constexpr u32 cases = 10000000;
     std::string flag = "Yes";
     void test() {
         std::cout << "Normal Calculation Test" << std::endl;
@@ -86,7 +87,7 @@ namespace normal_calc {
     }
 }
 namespace assignment_calc {
-    constexpr u32 cases = 1000;
+    constexpr u32 cases = 10000000;
     std::string flag = "Yes";
     template <typename T> void calc_result(T& assigned, const T& rhs, const Op& op) {
         switch(op) {
@@ -129,7 +130,7 @@ namespace assignment_calc {
     }
 }
 namespace logical_calc {
-    constexpr u32 cases = 1000;
+    constexpr u32 cases = 10000000;
     constexpr u32 p = 10, hit = 4;
     std::string flag = "Yes";
     void test() {
@@ -156,8 +157,8 @@ namespace logical_calc {
     }
 }
 namespace overflow {
-    constexpr u32 cases = 100;
-    constexpr u32 continuance = 100;
+    constexpr u32 cases = 10000;
+    constexpr u32 continuance = 1000;
     std::string flag = "Yes";
     i64 random_modulo() {
         return std::pow(10, eng32() % 10);
@@ -207,6 +208,50 @@ namespace overflow {
         }
         std::cout << "All results are correct: " << flag << std::endl;
         std::cout << std::endl;
+        return;
+    }
+}
+namespace speed {
+    constexpr u32 operation = 1000000;
+    constexpr u32 cases = 100;
+    template <typename T> std::vector<T> query(std::mt19937_64& eng) {
+        std::vector<T> all;
+        for(u32 i = 0; i < operation; ++i) {
+            T lhs = static_cast<i64>(eng()), rhs = static_cast<i64>(eng()), res;
+            Op op = op_divided(static_cast<Op>(eng() % 5), std::vector<Op>{ Op::add, Op::sub, Op::mul, Op::div, Op::mod });
+
+            res = op_divided(op, std::vector<T>{ lhs + rhs, lhs - rhs, lhs * rhs, lhs / rhs, lhs % rhs });
+            all.push_back(res);
+        }
+        return all;
+    }
+    template <typename T> void head(const std::vector<T>& all) {
+        std::cout << " head: [";
+        for(int i = 0; i < 5; ++i) std::cout << " " << all.at(i);
+        std::cout << " ]" << std::endl;
+        return;
+    }
+    void test() {
+        double total_i(0), total_c(0);
+        std::cout << "Speed Test ( Cases: " << cases << ", Operation: " << operation << " )" << std::endl;
+
+        for(u32 i = 0; i < cases; ++i) {
+            volatile const uint_fast64_t seed = get_random_64();
+            std::mt19937_64 eng_i(seed);
+            auto start_i = std::chrono::system_clock::now();
+            volatile auto&& all_i = query<i64>(eng_i);
+            auto end_i = std::chrono::system_clock::now();
+
+            std::mt19937_64 eng_c(seed);
+            auto start_c = std::chrono::system_clock::now();
+            volatile auto&& all_c = query<Checked>(eng_c);
+            auto end_c = std::chrono::system_clock::now();
+
+            total_i += std::chrono::duration_cast<std::chrono::milliseconds>(end_i - start_i).count();
+            total_c += std::chrono::duration_cast<std::chrono::milliseconds>(end_c - start_c).count();
+        }
+        std::cout << "Average calculation time (int):     " << total_i / static_cast<double>(cases) << " (ms)" << std::endl;
+        std::cout << "Average calculation time (Checked): " << total_c / static_cast<double>(cases) << " (ms)" << std::endl;
         return;
     }
 }
