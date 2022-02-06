@@ -110,4 +110,8 @@ namespace checked {
 		out << c.get_value();
 		return out;
 	}
+    std::istream& operator>>(std::istream& cin, Checked& c) {
+        cin >> c.integer.value;
+        return cin;
+    }
 }
