@@ -2,7 +2,8 @@
 #define flagged_hpp
 #include "int_def.hpp"
 #include <iostream>
-
+using Itype = std::int64_t;
+using uItype = std::uint64_t;
 namespace checked {
 	enum class HadOverflowed : bool {
 		Yes = true, No = false
