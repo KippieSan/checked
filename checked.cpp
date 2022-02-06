@@ -98,13 +98,12 @@ namespace checked {
 namespace checked {
 	bool operator==(const Checked& lhs_, const Checked& rhs_) {
 		const auto&& [lhs, rhs, status] = get_operand_data(lhs_, rhs_);
-		if (status == HadOverflowed::Yes) return false;
-		else return (lhs == rhs);
+		return (lhs == rhs);
 	}
 	std::strong_ordering operator<=>(const Checked& lhs_, const Checked& rhs_) {
 		const auto&& [lhs, rhs, status] = get_operand_data(lhs_, rhs_);
-		if ((lhs == rhs) || (status == HadOverflowed::Yes)) return std::strong_ordering::equal;
-		else return lhs > rhs ? std::strong_ordering::greater : std::strong_ordering::less;
+        if (lhs == rhs) return std::strong_ordering::equal;
+		else return lhs <=> rhs;
 	}
 	std::ostream& operator<<(std::ostream& out, const Checked& c) {
 		out << c.get_value();
