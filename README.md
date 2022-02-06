@@ -1,6 +1,9 @@
 # Checked
 ## 概要
-`Checked`型同士もしくは`Checked`型を含む演算($+, -, \times, \div, \bmod$)においてオーバーフローが発生しているかを検知し、している場合は「**過去にオーバーフローを起こした**」という情報を保持したうえでラップアラウンドを行うクラスです。コンパイラオプションは`-Wall -Wextra -std=c++20 -O3 -mtune=native -march=native`です。
+`Checked`型同士もしくは`Checked`型を含む演算(<img src=
+"https://render.githubusercontent.com/render/math?math=%5Ctextstyle+%2B%2C+-%2C+%5Ctimes%2C+%5Cdiv%2C+%5Cmod%0A" 
+alt="+, -, \times, \div, \mod
+">)においてオーバーフローが発生しているかを検知し、している場合は「**過去にオーバーフローを起こした**」という情報を保持したうえでラップアラウンドを行うクラスです。コンパイラオプションは`-Wall -Wextra -std=c++20 -O3 -mtune=native -march=native`です。
 
 ## 使用法
 ### 宣言
