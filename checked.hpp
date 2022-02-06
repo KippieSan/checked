@@ -43,6 +43,7 @@ namespace checked {
 		friend bool operator==(const Checked&, const Checked&);
 
 		friend std::ostream& operator<<(std::ostream&, const Checked&);
+        friend std::istream& operator>>(std::istream&, Checked&);
 	};
 }
 #endif // checked_hpp
