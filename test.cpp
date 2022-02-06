@@ -13,6 +13,7 @@ using i32 = std::int32_t;
 using u32 = std::uint32_t;
 constexpr std::streamsize m = 20;
 constexpr bool large_test = true;
+constexpr u32 unif = 10000;
 std::random_device rd;
 std::mt19937 eng32(rd());
 std::mt19937_64 eng64(rd());
@@ -66,7 +67,7 @@ void testcases(const u32 cases) {
     std::cout << " ( Cases: " << cases << " ) => ";
 }
 namespace normal_calc {
-    constexpr u32 cases = 10000000;
+    constexpr u32 cases = unif;
     std::string flag = "Yes";
     void test() {
         std::cout << "Normal Calculation Test" << std::endl;
@@ -87,7 +88,7 @@ namespace normal_calc {
     }
 }
 namespace assignment_calc {
-    constexpr u32 cases = 10000000;
+    constexpr u32 cases = unif;
     std::string flag = "Yes";
     template <typename T> void calc_result(T& assigned, const T& rhs, const Op& op) {
         switch(op) {
@@ -130,7 +131,7 @@ namespace assignment_calc {
     }
 }
 namespace logical_calc {
-    constexpr u32 cases = 10000000;
+    constexpr u32 cases = unif;
     constexpr u32 p = 10, hit = 4;
     std::string flag = "Yes";
     void test() {
@@ -157,8 +158,8 @@ namespace logical_calc {
     }
 }
 namespace overflow {
-    constexpr u32 cases = 10000;
-    constexpr u32 continuance = 1000;
+    constexpr u32 cases = 100;
+    constexpr u32 continuance = 100;
     std::string flag = "Yes";
     i64 random_modulo() {
         return std::pow(10, eng32() % 10);
@@ -212,8 +213,10 @@ namespace overflow {
     }
 }
 namespace speed {
-    constexpr u32 operation = 1000000;
+    constexpr bool ratio_test = true;
+    constexpr u32 operation = 100000;
     constexpr u32 cases = 100;
+    constexpr u32 ratio_cases = 100;
     template <typename T> std::vector<T> query(std::mt19937_64& eng) {
         std::vector<T> all;
         for(u32 i = 0; i < operation; ++i) {
@@ -233,25 +236,35 @@ namespace speed {
     }
     void test() {
         double total_i(0), total_c(0);
-        std::cout << "Speed Test ( Cases: " << cases << ", Operation: " << operation << " )" << std::endl;
+        double total_ratio(0);
+        std::cout << "Speed Test ( Cases: " << cases << ", Operation: " << operation << ", Ratio cases: " << ratio_cases << " )" << std::endl;
+        auto start = std::chrono::system_clock::now();
+        for(u32 r = 0; r < ratio_cases; ++r) {
+            for(u32 i = 0; i < cases; ++i) {
+                const uint_fast64_t seed = get_random_64();
+                std::mt19937_64 eng_i(seed);
+                auto start_i = std::chrono::system_clock::now();
+                auto&& all_i = query<i64>(eng_i);
+                auto end_i = std::chrono::system_clock::now();
 
-        for(u32 i = 0; i < cases; ++i) {
-            volatile const uint_fast64_t seed = get_random_64();
-            std::mt19937_64 eng_i(seed);
-            auto start_i = std::chrono::system_clock::now();
-            volatile auto&& all_i = query<i64>(eng_i);
-            auto end_i = std::chrono::system_clock::now();
+                std::mt19937_64 eng_c(seed);
+                auto start_c = std::chrono::system_clock::now();
+                auto&& all_c = query<Checked>(eng_c);
+                auto end_c = std::chrono::system_clock::now();
 
-            std::mt19937_64 eng_c(seed);
-            auto start_c = std::chrono::system_clock::now();
-            volatile auto&& all_c = query<Checked>(eng_c);
-            auto end_c = std::chrono::system_clock::now();
-
-            total_i += std::chrono::duration_cast<std::chrono::milliseconds>(end_i - start_i).count();
-            total_c += std::chrono::duration_cast<std::chrono::milliseconds>(end_c - start_c).count();
+                total_i += std::chrono::duration_cast<std::chrono::milliseconds>(end_i - start_i).count();
+                total_c += std::chrono::duration_cast<std::chrono::milliseconds>(end_c - start_c).count();
+            }
+            if(ratio_cases == 1 || r == ratio_cases - 1) {
+                std::cout << "Average calculation time (int):     " << total_i / static_cast<double>(cases * ratio_cases) << " (ms)" << std::endl;
+                std::cout << "Average calculation time (Checked): " << total_c / static_cast<double>(cases * ratio_cases) << " (ms)" << std::endl;
+            }
+            auto ratio = (total_c / static_cast<double>(cases)) / (total_i / static_cast<double>(cases));
+            total_ratio += ratio;
         }
-        std::cout << "Average calculation time (int):     " << total_i / static_cast<double>(cases) << " (ms)" << std::endl;
-        std::cout << "Average calculation time (Checked): " << total_c / static_cast<double>(cases) << " (ms)" << std::endl;
+        auto end = std::chrono::system_clock::now();
+        std::cout << "Average Checked : int ratio: " << total_ratio / ratio_cases << std::endl;
+        std::cout << "Speed test time: " << std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << " (s)" << std::endl;
         return;
     }
 }
