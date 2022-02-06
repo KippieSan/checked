@@ -1,6 +1,5 @@
 #ifndef flagged_hpp
 #define flagged_hpp
-#include "int_def.hpp"
 #include <iostream>
 using Itype = std::int64_t;
 using uItype = std::uint64_t;
