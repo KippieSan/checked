@@ -36,10 +36,10 @@ namespace checked {
 		Checked operator*=(const Checked& c) { (*this) = (*this) * c; return (*this); }
 		Checked operator/=(const Checked& c) { (*this) = (*this) / c; return (*this); }
 		Checked operator%=(const Checked& c) { (*this) = (*this) % c; return (*this); }
-		Checked operator++(int) { return (*this) + 1; }
-		Checked operator--(int) { return (*this) - 1; }
-		Checked operator++() { return (*this) + 1; }
-		Checked operator--() { return (*this) - 1; }
+		Checked operator++(int) { (*this) = (*this) + 1; return (*this); }
+		Checked operator--(int) { (*this) = (*this) - 1; return (*this); }
+		Checked operator++() { (*this) = (*this) + 1; return (*this); }
+		Checked operator--() { (*this) = (*this) - 1; return (*this); }
     private:
         friend std::istream& operator>>(std::istream&, Checked&);
 	};
