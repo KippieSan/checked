@@ -5,6 +5,18 @@
 #include <compare>
 
 namespace checked {
+    class Checked;
+    Checked operator+(const Checked&);
+    Checked operator-(const Checked&);
+    Checked operator+(const Checked&, const Checked&);
+	Checked operator-(const Checked&, const Checked&);
+	Checked operator*(const Checked&, const Checked&);
+	Checked operator/(const Checked&, const Checked&);
+	Checked operator%(const Checked&, const Checked&);
+    std::strong_ordering operator<=>(const Checked&, const Checked&);
+	bool operator==(const Checked&, const Checked&);
+	std::ostream& operator<<(std::ostream&, const Checked&);
+
 	class Checked {
 	private:
 		Flagged integer;
@@ -28,21 +40,7 @@ namespace checked {
 		Checked operator--(int) { return (*this) - 1; }
 		Checked operator++() { return (*this) + 1; }
 		Checked operator--() { return (*this) - 1; }
-
-	private:
-		friend Checked operator+(const Checked&);
-		friend Checked operator-(const Checked&);
-
-		friend Checked operator+(const Checked&, const Checked&);
-		friend Checked operator-(const Checked&, const Checked&);
-		friend Checked operator*(const Checked&, const Checked&);
-		friend Checked operator/(const Checked&, const Checked&);
-		friend Checked operator%(const Checked&, const Checked&);
-
-		friend std::strong_ordering operator<=>(const Checked&, const Checked&);
-		friend bool operator==(const Checked&, const Checked&);
-
-		friend std::ostream& operator<<(std::ostream&, const Checked&);
+    private:
         friend std::istream& operator>>(std::istream&, Checked&);
 	};
 }
