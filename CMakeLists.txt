@@ -9,6 +9,5 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -mtune=native -march=native")
 add_executable(
     ${PROJECT_NAME}
     main.cpp
-    checked.cpp
     test.cpp
 )
