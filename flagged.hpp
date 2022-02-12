@@ -11,11 +11,11 @@ namespace checked {
 		Itype value;
 		HadOverflowed status;
 
-		Flagged() : value(0), status(HadOverflowed::No) {}
-		Flagged(const Itype& v) : value(v), status(HadOverflowed::No) {}
-		Flagged(const Itype& v, const HadOverflowed& s) : value(v), status(s) {}
-		Flagged(const Flagged& f) : value(f.value), status(f.status) {}
-		Flagged operator=(const Flagged& f) { this->value = f.value, this->status = f.status; return (*this); }
+		Flagged() noexcept : value(0), status(HadOverflowed::No) {}
+		Flagged(const Itype& v) noexcept : value(v), status(HadOverflowed::No) {}
+		Flagged(const Itype& v, const HadOverflowed& s) noexcept : value(v), status(s) {}
+		Flagged(const Flagged& f) noexcept : value(f.value), status(f.status) {}
+		Flagged operator=(const Flagged& f) noexcept { this->value = f.value, this->status = f.status; return (*this); }
 	};
 }
-#endif
+#endif // flagged_hpp

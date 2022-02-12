@@ -13,7 +13,7 @@ using i32 = std::int32_t;
 using u32 = std::uint32_t;
 constexpr std::streamsize m = 20;
 constexpr bool large_test = true;
-constexpr u32 unif = 10000;
+constexpr u32 unif = 100000000;
 std::random_device rd;
 std::mt19937 eng32(rd());
 std::mt19937_64 eng64(rd());
@@ -158,8 +158,8 @@ namespace logical_calc {
     }
 }
 namespace overflow {
-    constexpr u32 cases = 100;
-    constexpr u32 continuance = 100;
+    constexpr u32 cases = 10000;
+    constexpr u32 continuance = 10000;
     std::string flag = "Yes";
     i64 random_modulo() {
         return std::pow(10, eng32() % 10);
