@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <math.h>
 #include <chrono>
-#include "checked.hpp"
+#include "fast_checked.hpp"
 #include "test.hpp"
 using namespace checked;
 using i64 = std::int64_t;
