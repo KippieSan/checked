@@ -7,17 +7,17 @@ namespace {
 	constexpr Itype max = std::numeric_limits<Itype>::max();
 }
 namespace checked {
-	Checked operator+(const Checked& rhs) {
+	Checked operator+(const Checked& rhs) noexcept {
 		return rhs;
 	}
-	Checked operator-(const Checked& rhs) {
+	Checked operator-(const Checked& rhs) noexcept {
 		const auto&& [value, status] = rhs.get_flagged();
 		if (value == min && value < 0) return Checked(min, HadOverflowed::Yes);
 		else return Checked(-value, status);
 	}
 }
 namespace checked {
-    HadOverflowed operator||(const HadOverflowed& lhs, const HadOverflowed& rhs) {
+    HadOverflowed operator||(const HadOverflowed& lhs, const HadOverflowed& rhs) noexcept {
         return (static_cast<bool>(lhs) || static_cast<bool>(rhs)) ? HadOverflowed::Yes : HadOverflowed::No;
     }
 	struct OperandData {
@@ -25,21 +25,21 @@ namespace checked {
 		Itype rhs;
 		HadOverflowed status;
 	};
-	OperandData get_operand_data(const Checked& lhs, const Checked& rhs) {
+	OperandData get_operand_data(const Checked& lhs, const Checked& rhs) noexcept {
 		const auto&& status = lhs.get_status() || rhs.get_status();
 		return { .lhs = lhs.get_value(), .rhs = rhs.get_value(), .status = status };
 	}
 	enum class Sign {
 		SamePositive, SameNegative, Different
 	};
-	Sign get_operand_sign(const Itype& lhs, const Itype& rhs) {
+	Sign get_operand_sign(const Itype& lhs, const Itype& rhs) noexcept {
 		if (lhs >= 0 && rhs >= 0) return Sign::SamePositive;
 		else if (lhs < 0 && rhs < 0) return Sign::SameNegative;
 		else return Sign::Different;
 	}
 }
 namespace checked {
-	Checked operator+(const Checked& lhs_, const Checked& rhs_) {
+	Checked operator+(const Checked& lhs_, const Checked& rhs_) noexcept {
 		const auto&& [lhs, rhs, status] = get_operand_data(lhs_, rhs_);
 		switch (get_operand_sign(lhs, rhs)) {
 		case Sign::SamePositive:
@@ -56,13 +56,13 @@ namespace checked {
 			break;
 		}
 	}
-	Checked operator-(const Checked& lhs_, const Checked& rhs_) {
+	Checked operator-(const Checked& lhs_, const Checked& rhs_) noexcept {
 		const auto&& [lhs, rhs, status] = get_operand_data(lhs_, rhs_);
 		if (rhs == min && lhs < 0) return Checked(lhs - rhs, status);
 		else if (rhs == min && lhs >= 0) return Checked(min + lhs, HadOverflowed::Yes);
 		else return (Checked(lhs, status) + Checked(-rhs));
 	}
-	Checked operator*(const Checked& lhs_, const Checked& rhs_) {
+	Checked operator*(const Checked& lhs_, const Checked& rhs_) noexcept {
 		const auto&& [lhs, rhs, status] = get_operand_data(lhs_, rhs_);
 		const auto&& wrapped = static_cast<Itype>(static_cast<uItype>(lhs) * static_cast<uItype>(rhs));
 
@@ -82,13 +82,13 @@ namespace checked {
 			else return Checked(wrapped, HadOverflowed::Yes);
 		}
 	}
-	Checked operator/(const Checked& lhs_, const Checked& rhs_) {
+	Checked operator/(const Checked& lhs_, const Checked& rhs_) noexcept {
 		const auto&& [lhs, rhs, status] = get_operand_data(lhs_, rhs_);
 		if (lhs == min && rhs == -1) return Checked(min, HadOverflowed::Yes);
 		else if (rhs == 0) return Checked(0, HadOverflowed::Yes);
 		else return Checked(lhs / rhs, status);
 	}
-	Checked operator%(const Checked& lhs_, const Checked& rhs_) {
+	Checked operator%(const Checked& lhs_, const Checked& rhs_) noexcept {
 		const auto&& [lhs, rhs, status] = get_operand_data(lhs_, rhs_);
 		if (rhs == 1 || rhs == -1) return Checked(0, status);
 		else if (rhs == 0) return Checked(0, HadOverflowed::Yes);
@@ -96,20 +96,20 @@ namespace checked {
 	}
 }
 namespace checked {
-	bool operator==(const Checked& lhs_, const Checked& rhs_) {
+	bool operator==(const Checked& lhs_, const Checked& rhs_) noexcept {
 		const auto&& [lhs, rhs, status] = get_operand_data(lhs_, rhs_);
 		return (lhs == rhs);
 	}
-	std::strong_ordering operator<=>(const Checked& lhs_, const Checked& rhs_) {
+	std::strong_ordering operator<=>(const Checked& lhs_, const Checked& rhs_) noexcept {
 		const auto&& [lhs, rhs, status] = get_operand_data(lhs_, rhs_);
         if (lhs == rhs) return std::strong_ordering::equal;
 		else return lhs <=> rhs;
 	}
-	std::ostream& operator<<(std::ostream& out, const Checked& c) {
+	std::ostream& operator<<(std::ostream& out, const Checked& c) noexcept {
 		out << c.get_value();
 		return out;
 	}
-    std::istream& operator>>(std::istream& cin, Checked& c) {
+    std::istream& operator>>(std::istream& cin, Checked& c) noexcept {
         cin >> c.integer.value;
         return cin;
     }
