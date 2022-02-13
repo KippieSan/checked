@@ -63,6 +63,7 @@ auto value_c = c.get_status();
 を`operation`回行った時間を測定し、更にこれを`cases`回繰り返して`int`及び`Checked`の演算時間の平均及びその時間比を出します。更にこれを`ratio_cases`回繰り返して時間比の平均を取っています。`ratio`はその最大値と最小値を保持しておきます。また、乱数生成機は`int`, `Checked`の前で同じシードで新しく生成し、全く同じ演算が行われるようにしています。
 `cases = 100`, `operation = 100000`, `ratio_cases = 100`でテストを行った結果は次のようになります。
 
+
 ```
 Speed Test ( Cases: 100, Operation: 100000, Ratio cases: 100 )
 Average calculation time (int):     14.3076 (ms)
