@@ -6,6 +6,14 @@ alt="+, -, \times, \div, \mod
 ">)においてオーバーフローが発生しているかを検知し、している場合は「**過去にオーバーフローを起こした**」という情報を保持したうえでラップアラウンドを行うクラスです。コンパイラオプションは`-Wall -Wextra -std=c++20 -O3 -mtune=native -march=native`です。
 
 ## 使用法
+メインとなるファイルは
+- `flagged.hpp`
+- `checked.hpp`
+- `checked.cpp`
+
+です。`fast_checked.hpp`は`IO`関数以外すべてを`constexpr`関数化し、高速化を図ったものです。`template_checked.hpp`はこれをテンプレート化したものになります。但しこちらはオーバーフローを起こした場合ラップアラウンドではなく、値がその上界、下界で留まるようにしています。いずれもヘッダファイルに全ての実装が書かれています。
+
+テンプレートで使用可能な型は`signed`の整数型(2の補数)のみです。`unsigned`については上手く動きません。
 ### 宣言
 初期化子がない場合は`0`で初期化されます。数値及び`Checked`はコンストラクタ、代入のどちらかで初期化することができます。`Checked`を使った初期化ではステータスが受け継がれます(`c, d, e`のステータスは`HadOverflowed::Yes`となります)。
 ```c++
@@ -45,55 +53,74 @@ auto value_c = c.get_status();
 `test.cpp`の各名前空間先頭の`cases`がテストケースの数を表しています。テストケースの数が少ない場合は`test.cpp: 15`の`large_test`を`false`に設定することで、演算内容を出力します。
 
 ### Checked型の演算速度について
-結論としては`Checked`型は通常の`std::int64_t`と比べて1.25～1.3倍程度遅くなります。
+結論としては`Checked`型は通常の`std::int64_t`と比べて1.3倍程度遅くなります。
 `test.cpp : speed`では
 - 乱数生成機のシードを決定
 - 乱数による`lhs`, `rhs`, `operator`の生成
 - 演算
 - `std::vector`にプッシュ
 
-を`operation`回行った時間を測定し、更にこれを`cases`回繰り返して`int`及び`Checked`の演算時間の平均及びその時間比を出します。更にこれを`ratio_cases`回繰り返して時間比の平均を取っています。また、乱数生成機は`int`, `Checked`の前で同じシードで新しく生成し、全く同じ演算が行われるようにしています。
-`cases = 100`, `operation = 100000`, `ratio_cases = 100`でテストを行った結果を三回並べると
+を`operation`回行った時間を測定し、更にこれを`cases`回繰り返して`int`及び`Checked`の演算時間の平均及びその時間比を出します。更にこれを`ratio_cases`回繰り返して時間比の平均を取っています。`ratio`はその最大値と最小値を保持しておきます。また、乱数生成機は`int`, `Checked`の前で同じシードで新しく生成し、全く同じ演算が行われるようにしています。
+`cases = 100`, `operation = 100000`, `ratio_cases = 100`でテストを行った結果は次のようになります。
 
 ```
 Speed Test ( Cases: 100, Operation: 100000, Ratio cases: 100 )
-Average calculation time (int):     15.6368 (ms)
-Average calculation time (Checked): 19.836 (ms)
-Average Checked : int ratio: 1.26745
-
-Speed Test ( Cases: 100, Operation: 100000, Ratio cases: 100 )
-Average calculation time (int):     15.4996 (ms)
-Average calculation time (Checked): 19.5563 (ms)
-Average Checked : int ratio: 1.26144
-
-Speed Test ( Cases: 100, Operation: 100000, Ratio cases: 100 )
-Average calculation time (int):     16.0967 (ms)
-Average calculation time (Checked): 20.7013 (ms)
-Average Checked : int ratio: 1.28474
+Average calculation time (int):     14.3076 (ms)
+Average calculation time (Checked): 18.2656 (ms)
+Average Checked : int ratio: 1.27352 => ( lowest: 1.2529, highest: 1.27672 )
+Speed test time: 337 (s)
 ```
 
-となり、1.25～1.3倍程度の遅延があることが分かります。
+1.27付近に分布していますがテストケースによっては1.25～1.3までの誤差があるのでおよそ1.3倍としています。
 
-### テスト結果例
+#### fast_checked.hppを使った場合の演算速度
+通常の`Checked`型は`std::int64_t`に対して1.3倍程度の遅延がありましたが、`fast_checked.hpp`を用いて同様のテストを行うと結果は次のようになります。テストの方法は`Checked`と同じです。
+
+```
+Speed Test ( Cases: 100, Operation: 100000, Ratio cases: 100 )
+Average calculation time (int):     14.9858 (ms)
+Average calculation time (Checked): 17.899 (ms)
+Average Checked : int ratio: 1.19247 => ( lowest: 1.16972, highest: 1.19593 )
+Speed test time: 341 (s)
+```
+
+1.2倍ほどの遅延となります。
+
+#### template_checked.hppを使った場合の演算速度
+`template_checked.hpp`を用いてテストを行うと結果は次のようになります。
+
+```
+Speed Test ( Cases: 100, Operation: 100000, Ratio cases: 100 )
+Average calculation time (int):     14.2722 (ms)
+Average calculation time (Checked): 17.775 (ms)
+Average Checked : int ratio: 1.24645 ( lowest: 1.24449, highest: 1.25088 )
+Speed test time: 331 (s)
+```
+
+1.25倍ほどの遅延となりますがテストケースによっては1.21～1.26倍までの誤差があります。
+
+つまり速度は`Checked`<`template_checked`<`fast_checked`となります。
+
+### テスト結果例(Checked)
 
 ```
 Normal Calculation Test
- ( Cases: 10000 ) => All results are correct: Yes
+ ( Cases: 100000000 ) => All results are correct: Yes
 
 Assignment Calculation Test
- ( Cases: 10000 ) => All results are correct: Yes
+ ( Cases: 100000000 ) => All results are correct: Yes
 
 Logical Operation Test
- ( Cases: 10000 ) => All results are correct: Yes
+ ( Cases: 100000000 ) => All results are correct: Yes
 
 Overflow Test
- ( Cases: 10000 ) => All results are correct: Yes
+ ( Cases: 100000000 ) => All results are correct: Yes
 
 Speed Test ( Cases: 100, Operation: 100000, Ratio cases: 100 )
-Average calculation time (int):     16.6609 (ms)
-Average calculation time (Checked): 21.0272 (ms)
-Average Checked : int ratio: 1.26323
-Speed test time: 388 (s)
+Average calculation time (int):     14.3076 (ms)
+Average calculation time (Checked): 18.2656 (ms)
+Average Checked : int ratio: 1.27352 => ( lowest: 1.2529, highest: 1.27672 )
+Speed test time: 337 (s)
 ```
 
 ```
@@ -130,9 +157,9 @@ test #0
          76860556133 *       -4952677844857 =  1437201773393289795 status: HadOverflowed::Yes : o
 All results are correct: Yes
 
-Speed Test ( Cases: 1, Operation: 100000, Ratio cases: 1 )
-Average calculation time (int):     17 (ms)
-Average calculation time (Checked): 20 (ms)
-Average Checked : int ratio: 1.17647
-Speed test time: 0 (s)
+Speed Test ( Cases: 100, Operation: 100000, Ratio cases: 100 )
+Average calculation time (int):     14.9858 (ms)
+Average calculation time (Checked): 17.899 (ms)
+Average Checked : int ratio: 1.19247 => ( lowest: 1.16972, highest: 1.19593 )
+Speed test time: 341 (s)
 ```
