@@ -237,6 +237,7 @@ namespace speed {
     void test() {
         double total_i(0), total_c(0);
         double total_ratio(0);
+        double low(2000.0), high(-1.0);
         std::cout << "Speed Test ( Cases: " << cases << ", Operation: " << operation << ", Ratio cases: " << ratio_cases << " )" << std::endl;
         auto start = std::chrono::system_clock::now();
         for(u32 r = 0; r < ratio_cases; ++r) {
@@ -260,10 +261,13 @@ namespace speed {
                 std::cout << "Average calculation time (Checked): " << total_c / static_cast<double>(cases * ratio_cases) << " (ms)" << std::endl;
             }
             auto ratio = (total_c / static_cast<double>(cases)) / (total_i / static_cast<double>(cases));
+            low = std::min(ratio, low);
+            high = std::max(ratio, high);
             total_ratio += ratio;
         }
         auto end = std::chrono::system_clock::now();
-        std::cout << "Average Checked : int ratio: " << total_ratio / ratio_cases << std::endl;
+        std::cout << "Average Checked : int ratio: " << total_ratio / ratio_cases;
+        std::cout << " => ( lowest: " << low << ", highest: " << high << " )" << std::endl;
         std::cout << "Speed test time: " << std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << " (s)" << std::endl;
         return;
     }
