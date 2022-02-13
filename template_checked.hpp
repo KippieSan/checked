@@ -3,6 +3,7 @@
 #include <iostream>
 #include <limits>
 #include <compare>
+// Constatnt
 namespace {
 	template <typename T> constexpr T min = std::numeric_limits<T>::min();
 	template <typename T> constexpr T max = std::numeric_limits<T>::max();
@@ -110,6 +111,8 @@ namespace checked {
 }
 // Binary operators
 namespace checked {
+    template <typename T> constexpr Checked<T> operator+(const Checked<T>& c) noexcept { return c; }
+    template <typename T> constexpr Checked<T> operator-(const Checked<T>& c) noexcept { return Checked(-c.get_value(), c.get_status()); }
 	template <typename T> constexpr Checked<T> operator+(const Checked<T>& lhs, const Checked<T>& rhs) noexcept { Checked tmp = lhs; return tmp += rhs; }
 	template <typename T> constexpr Checked<T> operator-(const Checked<T>& lhs, const Checked<T>& rhs) noexcept { Checked tmp = lhs; return tmp -= rhs; }
 	template <typename T> constexpr Checked<T> operator*(const Checked<T>& lhs, const Checked<T>& rhs) noexcept { Checked tmp = lhs; return tmp *= rhs; }

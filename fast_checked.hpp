@@ -3,6 +3,7 @@
 #include <iostream>
 #include <limits>
 #include <compare>
+// Integer type definition & Constatnt
 using Itype = std::int64_t;
 using uItype = std::uint64_t;
 namespace {
@@ -110,6 +111,8 @@ namespace checked {
 }
 // Binary operators
 namespace checked {
+    constexpr Checked operator+(const Checked& c) noexcept { return c; }
+    constexpr Checked operator-(const Checked& c) noexcept { return Checked(-c.get_value(), c.get_status()); }
 	constexpr Checked operator+(const Checked& lhs, const Checked& rhs) noexcept { Checked tmp = lhs; return tmp += rhs; }
 	constexpr Checked operator-(const Checked& lhs, const Checked& rhs) noexcept { Checked tmp = lhs; return tmp -= rhs; }
 	constexpr Checked operator*(const Checked& lhs, const Checked& rhs) noexcept { Checked tmp = lhs; return tmp *= rhs; }
