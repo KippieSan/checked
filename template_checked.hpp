@@ -3,6 +3,7 @@
 #include <iostream>
 #include <limits>
 #include <compare>
+// Constatnt
 namespace {
 	template <typename T> constexpr T min = std::numeric_limits<T>::min();
 	template <typename T> constexpr T max = std::numeric_limits<T>::max();

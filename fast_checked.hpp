@@ -3,6 +3,7 @@
 #include <iostream>
 #include <limits>
 #include <compare>
+// Integer type definition & Constatnt
 using Itype = std::int64_t;
 using uItype = std::uint64_t;
 namespace {
